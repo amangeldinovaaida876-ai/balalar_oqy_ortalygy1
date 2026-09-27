@@ -1,0 +1,853 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книжная выставка Топ-10 / Кітап көрмесі</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+      body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #2d3748; /* темный цвет текста, чтобы на жёлтом было хорошо видно */
+    min-height: 100vh;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+
+    /* Мягкий жёлтенький детский градиент с облачками */
+    background:
+        radial-gradient(circle at 8% 15%, rgba(255,255,255,0.75) 0 45px, transparent 46px),
+        radial-gradient(circle at 15% 13%, rgba(255,255,255,0.7) 0 35px, transparent 36px),
+        radial-gradient(circle at 88% 20%, rgba(255,255,255,0.7) 0 50px, transparent 51px),
+        radial-gradient(circle at 94% 18%, rgba(255,255,255,0.65) 0 35px, transparent 36px),
+        linear-gradient(
+            135deg,
+            #fff9db 0%,
+            #fff3cd 35%,
+            #ffe58f 70%,
+            #ffd666 100%
+        );
+}
+
+/* Декоративные бабочки */
+body::before {
+    content: "🦋   🦋   🌸   🦋";
+    position: fixed;
+    top: 30px;
+    left: 20px;
+    font-size: 38px;
+    letter-spacing: 25px;
+    opacity: 0.75;
+    animation: flyButterfly 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Цветочки и бабочки внизу */
+body::after {
+    content: "🌸  🦋  🌼  🦋  🌸";
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 35px;
+    letter-spacing: 12px;
+    opacity: 0.75;
+    animation: floatDecor 6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes flyButterfly {
+    0%, 100% {
+        transform: translate(0, 0) rotate(-3deg);
+    }
+
+    50% {
+        transform: translate(50px, 35px) rotate(5deg);
+    }
+}
+
+@keyframes floatDecor {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-25px);
+    }
+}
+
+/* Весь сайт поверх декоративного фона */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #e031d8;
+            text-shadow: 0 2px 4px rgba(129, 6, 6, 0.3);
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #0d275f;
+            margin-bottom: 30px;
+        }
+        
+        /* Табы для переключения языков */
+        .lang-tabs {
+            display: inline-flex;
+            background: rgba(168, 5, 201, 0.1);
+            padding: 5px;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: #8da2cf;
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: #00bcd4;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        /* Поиск */
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 40px auto;
+        }
+        .search-input {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(27, 236, 191, 0.2);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #00bcd4;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.2);
+        }
+
+        /* Сетка книг */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 30px;
+        }
+        .lang-section {
+            display: none;
+        }
+        .lang-section.active {
+            display: block;
+        }
+
+        /* Карточка книги */
+        .book-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+            height: 540px; /* Фиксированная высота карточки */
+        }
+        .book-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 188, 212, 0.4);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 188, 212, 0.1);
+        }
+        .book-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(45deg, #ff5252, #ff793f);
+            color: white;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 20px;
+            z-index: 2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .book-cover {
+            width: 100%;
+            height: 340px; /* Жесткая высота контейнера обложки */
+            position: relative;
+            background: #12254e;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Картинка полностью помещается без искажений */
+            transition: transform 0.5s ease;
+        }
+        .book-card:hover .book-cover img {
+            transform: scale(1.04);
+        }
+        
+        /* Заглушка для фото */
+        .placeholder-cover {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+            text-align: center;
+        }
+        .placeholder-cover svg {
+            width: 50px;
+            height: 50px;
+            fill: rgba(255,255,255,0.6);
+            margin-bottom: 10px;
+        }
+
+        .book-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+            height: 200px; /* Фиксированное пространство под информацию */
+            background: rgba(13, 27, 62, 0.4);
+        }
+        .book-text-group {
+            overflow: hidden;
+        }
+        .book-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #ffffff;
+            line-height: 1.3;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .book-author {
+            font-size: 0.95rem;
+            color: #00bcd4;
+            margin-bottom: 15px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .book-btn {
+            display: block;
+            text-align: center;
+            background: #00bcd4;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2);
+            width: 100%;
+        }
+        .book-btn:hover {
+            background: #00e5ff;
+            box-shadow: 0 6px 18px rgba(0, 188, 212, 0.4);
+        }
+
+        /* МОДАЛЬНОЕ ОКНО (ВСПЛЫВАЮЩЕЕ ОПИСАНИЕ) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 13, 32, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: #12254e;
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #8da2cf;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #ff5252;
+        }
+        .modal-title {
+            font-size: 1.6rem;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        .modal-author {
+            color: #00bcd4;
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .modal-desc {
+            color: #d1dcff;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        .books-grid {
+    display: grid;
+    /* Создает ровно 5 колонок одинаковой ширины */
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 20px; /* Расстояние между карточками */
+    padding: 20px 0;
+}
+
+/* Адаптивность: чтобы на смартфонах и планшетах сетка не сжималась в микро-колонки */
+@media (max-width: 1024px) {
+    .books-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 колонки на планшетах */
+    }
+}
+
+@media (max-width: 768px) {
+    .books-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 колонки на мини-планшетах */
+    }
+}
+
+@media (max-width: 480px) {
+    .books-grid {
+        grid-template-columns: 1fr; /* 1 колонка на телефонах */
+    }
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h1 id="main-title">Книжная десятка, покорившая сердца</h1>
+        <p class="subtitle" id="main-subtitle">Лучшие книги, которые рекомендует библиотека</p>
+        
+        <div class="lang-tabs">
+            <button class="tab-btn active" onclick="switchLanguage('ru')">Русский</button>
+            <button class="tab-btn" onclick="switchLanguage('kk')">Қазақша</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-bar" placeholder="Поиск книги..." onkeyup="filterBooks()">
+        </div>
+    </div>
+
+    <div id="section-ru" class="lang-section active">
+        <div class="books-grid">
+            <div class="book-card">
+                <div class="book-badge">#1</div>
+                <div class="book-cover">
+                    <img src="c1de8575-6857-4e6b-a6b6-e61f26765035.jpg"alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title"> «Хроники Нарнии»</h3>
+                        <p class="book-author">Льюис.К</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Хроники Нарнии»', 'Льюис.К', 'Фантастическая история о детях, которые попадают в волшебную страну Нарнию и становятся участниками удивительных приключений, сражений и борьбы добра со злом. ✨')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#2</div>
+                <div class="book-cover">
+                    <img src="e3ddcf16-8ef4-4150-934e-38d9cfad00a8.jpg" alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Зуб мудрости»</h3>
+                        <p class="book-author">Ескен Елубаев</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Зуб мудрости', 'Ескен Елубаев', '   Книга о детях, их дружбе, взрослении, школьной жизни и забавных ситуациях, которые помогают героям становиться мудрее.❤️')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#3</div>
+                <div class="book-cover">
+                    <img src="0a4525ad-8eff-4450-8ee6-570be4082fc5.jpg"alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«2500 скороговорок»</h3>
+                        <p class="book-author"> М. Смирнова</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('2500 скороговорок', 'М. Смирнова', ' Сборник весёлых скороговорок для тренировки речи, дикции, памяти и правильного произношения. ✨🌌')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#4</div>
+                <div class="book-cover">
+                    <img src="360871a0-acdb-4e06-bb23-ff1f3b7e2839.jpg"alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Путешествие в детство»</h3>
+                        <p class="book-author"> Бердибек Сокпакбаев</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Путешествие в детство', 'Бердибек Сокпакбаев',  '    Произведение о детстве, школьных годах, дружбе и повседневной жизни детей, наполненное добрым юмором и интересными событиями.✨')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#5</div>
+                <div class="book-cover">
+                    <img src="87cd8189-45cf-45d4-bf0c-d6da72b6509a.jpg" alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Зов солнца» </h3>
+                        <p class="book-author"> Лиля Калаус </p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Зов солнца', ' Лиля Калаус ', '    История о детях, их мечтах, приключениях и поиске своего пути. Книга рассказывает о дружбе, смелости и важных жизненных открытиях.✨')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#6</div>
+                <div class="book-cover">
+                    <img src="cf61ff57-44cd-4587-bd23-88597b568395.jpg"alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Доброжелательный Аскар»</h3>
+                        <p class="book-author">  Баянгали Алимжанов </p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Доброжелательный Аскар', '  Баянгали Алимжанов ', 'Добрая история о мальчике Аскаре, который отличается отзывчивостью, добротой и готовностью помогать окружающим.')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#7</div>
+                <div class="book-cover">
+                    <img src="5b9947fc-c7c2-4f48-a102-3d9eb1c0ade2.jpg"alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Казахские богатырские сказания»</h3>
+                       
+                    </div>
+                    <button class="book-btn" onclick="openModal('Казахские богатырские сказания', 'Сборник народных эпических историй о казахских батырах, их подвигах, смелости, чести, защите родной земли и верности своему народу.🔍')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#8</div>
+                <div class="book-cover">
+                    <img src="589e2f7d-f6dd-45d9-9e41-e7908bb5315f.jpg" alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Абылай хан и его батыры» </h3>
+                        <p class="book-author"> Баянгали Алимжанов</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Абылай хан и его батыры', 'Баянгали Алимжанов', 'Книга рассказывает об Абылай хане и его храбрых батырах, их подвигах, защите родной земли и исторических событиях.💛')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#9</div>
+                <div class="book-cover">
+                    <img src="7f8c1bf0-4453-4dff-be86-69b42f15c8a1.jpg" alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Говорящий свёрток»</h3>
+                        <p class="book-author"> Дж. Даррелл </p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Говорящий свёрток', 'Дж. Даррелл', '  Увлекательная фантастическая история о необычном говорящем свёртке и путешествии героев в удивительный мир, полный приключений и загадок.🌌')">Подробнее</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#10</div>
+                <div class="book-cover">
+                    <img src="cdb103f6-f1a1-40d5-8746-c557ecbff6e5.jpg"alt="Обложка" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Добавьте фото</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Карантинные человечки» </h3>
+                        <p class="book-author">Елена Клепикова </p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Карантинные человечки', 'Елена Клепикова ', '  История о детях и необычной жизни во время карантина. Книга показывает их переживания, общение, фантазии и то, как даже в сложной ситуации можно находить интересные занятия.😊📚')">Подробнее</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="section-kk" class="lang-section">
+        <div class="books-grid">
+            <div class="book-card">
+                <div class="book-badge">#1</div>
+                <div class="book-cover">
+                    <img src="95a4d683-43a0-422e-a30f-c03585a432a0.jpg" alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Қыздарға арналған хобби»</h3>
+                        <p class="book-author">Рензо Барзоти</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Қыздарға арналған хобби', 'Рензо Барзоти', 'Қыздарға арналған қызықты хоббилер мен шығармашылық істер туралы кітап. Бос уақытты пайдалы әрі көңілді өткізуге көмектеседі.')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#2</div>
+                <div class="book-cover">
+                    <img src="b5ee041c-ac0e-4f6e-9f71-2b6ddc5628ab.jpg"alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Карантиндік кішкентайлар»</h3>
+                        <p class="book-author">Елена Клепикова</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Карантиндік кішкентайлар', 'Елена Клепикова', 'Карантин кезіндегі балалардың өмірі, қызықты оқиғалары, достығы мен қиялы туралы көңілді шығарма.✨')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#3</div>
+                <div class="book-cover">
+                    <img src="b2782de9-6947-4682-9a3b-7fa5f4b8d81b.jpg" alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Айдаһар қыздар»</h3>
+                        <p class="book-author">Медди Мара</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Айдаһар қыздар','Медди Мара', 'Айдаһарлардың сиқырлы әлеміне тап болған қыздар туралы қызықты фантастикалық оқиға. Достық, батылдық пен шытырман оқиғаларға толы.❤️')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#4</div>
+                <div class="book-cover">
+                    <img src="cb021117-8220-4890-8328-0b4732e59ca5.jpg"alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Қазақстан динозаврлары» </h3>
+                        <p class="book-author">Гүлжан Назымбетова</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Қазақстан динозаврлары', 'Гүлжан Назымбетова', 'Қазақстан аумағында өмір сүрген динозаврлар туралы танымдық кітап. Ежелгі жануарлар мен олардың тіршілігі жайлы қызықты мәліметтер береді🤝📚')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#5</div>
+                <div class="book-cover">
+                    <img src="ee137fdf-c5a5-431c-9912-a768ba3cabde.jpg"alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Дамока және оның достары»</h3>
+                        <p class="book-author">Айгүл Төлембаева</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Дамока және оның достары', 'Айгүл Төлембаева', '  Дамока мен оның достарының басынан өтетін қызықты оқиғалар туралы шығарма. Достық, бір-біріне көмектесу және мейірімділік тақырыптары қамтылады.🌸📚')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#6</div>
+                <div class="book-cover">
+                    <img src="199ace8e-71fa-49a4-adff-43bb9bc90978.jpg" alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Керіктің құпиясы» </h3>
+                        <p class="book-author">Райхан Мәженқызы</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Керіктің құпиясы', 'Райхан Мәженқызы', 'Керікке қатысты қызықты құпияны ашуға тырысатын кейіпкерлер туралы танымдық әрі қызықты оқиға. 📚✨')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#7</div>
+                <div class="book-cover">
+                    <img src="d500786b-03d7-452e-bca2-f3ed717fabda.jpg"" alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Ақ жол» </h3>
+                        <p class="book-author">Айса Хамзеұлы</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Ақ жол', 'Айса Хамзеұлы', 'Жақсылыққа, адалдыққа және дұрыс жолды таңдауға үндейтін тәрбиелік мәні бар шығарма.✨📚')">Толығырақ</button>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-badge">#8</div>
+                <div class="book-cover">
+                    <img src="f7198bc3-75f3-44bd-a10c-146b2db42481.jpg"alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title"> «Ертегілер»</h3>
+                        <p class="book-author">қазақ комиксі</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Ертегілер','қазақ комиксі',' Қазақ халқының танымал ертегілері комикс түрінде ұсынылған. Түрлі-түсті суреттер арқылы балаларға ұлттық ертегілерді қызықты түрде таныстырады. 🐰📚')">Толығырақ</button>
+                </div>
+            </div>
+            <!-- Кітап 9 -->
+            <div class="book-card">
+                <div class="book-badge">#9</div>
+                <div class="book-cover">
+                  
+                    <img src="4cfafda6-4f3c-4e13-be4e-0005e2774fe1.jpg" alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Балқаш. Ұлы дала аңыздарые»</h3>
+                        <p class="book-author">Qazcomics</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Балқаш. Ұлы дала аңыздары','Qazcomics','Балқаш туралы қазақ халқының аңыздары комикс түрінде баяндалады. Шығармада туған жер, табиғат, батырлық пен халықтың тарихи мұрасы туралы қызықты оқиғалар суреттеледі.📚✨')">Толығырақ</button>
+                </div>
+            </div>
+
+            <!-- Кітап 10 -->
+            <div class="book-card">
+                <div class="book-badge">#10</div>
+                <div class="book-cover">
+                    <!-- Замените имя файла на ваше реальное фото, если оно есть -->
+                    <img src="6e134e79-36e7-4934-bc9a-46b20b127e05.jpg" alt="Мұқаба" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="placeholder-cover" style="display:none;">
+                        <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.64-2.52-1-4-1s-2.89.36-4 1c-1.11-.64-2.52-1-4-1s-2.89.36-4 1v14c1.11-.64 2.52-1 4-1s2.89.36 4 1c1.11-.64 2.52-1 4-1s2.89.36 4 1V5z"/></svg>
+                        <span>Суретті қосу</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <div class="book-text-group">
+                        <h3 class="book-title">«Ағасы мен қарындасы»</h3>
+                        <p class="book-author">Бердібек Соқпақбаев</p>
+                    </div>
+                    <button class="book-btn" onclick="openModal('Ағасы мен қарындасы','Бердібек Соқпақбаев','Аға мен қарындастың қарым-қатынасы, отбасылық байланыс, қамқорлық пен бауырмалдық туралы шығарма.📚')">Толығырақ</button>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="book-modal" onclick="closeModal(event)">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal(null)">&times;</button>
+        <h2 class="modal-title" id="m-title">Название книги</h2>
+        <p class="modal-author" id="m-author">Автор</p>
+        <p class="modal-desc" id="m-desc">Полное описание книги...</p>
+    </div>
+</div>
+
+<script>
+    // Смена языка
+    function switchLanguage(lang) {
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        const sections = document.querySelectorAll('.lang-section');
+        sections.forEach(sec => sec.classList.remove('active'));
+
+        const title = document.getElementById('main-title');
+        const subtitle = document.getElementById('main-subtitle');
+        const searchInput = document.getElementById('search-bar');
+
+        if(lang === 'ru') {
+            document.getElementById('section-ru').classList.add('active');
+            if (event) event.target.classList.add('active');
+            title.innerText = "Книжная десятка, покорившая сердца";
+            subtitle.innerText = "Лучшие книги, которые рекомендует библиотека";
+            searchInput.placeholder = "Поиск книги...";
+        } else {
+            document.getElementById('section-kk').classList.add('active');
+            if (event) event.target.classList.add('active');
+            title.innerText = "Жүректерді жаулаған он кітап";
+            subtitle.innerText = "Кітапхана ұсынатын ең үздік кітаптар";
+            searchInput.placeholder = "Кітапты іздеу...";
+        }
+        searchInput.value = '';
+        filterBooks();
+    }
+
+    // Поиск по названию/автору
+    function filterBooks() {
+        const input = document.getElementById('search-bar').value.toLowerCase();
+        const activeSection = document.querySelector('.lang-section.active');
+        const cards = activeSection.querySelectorAll('.book-card');
+
+        cards.forEach(card => {
+            const title = card.querySelector('.book-title').innerText.toLowerCase();
+            const author = card.querySelector('.book-author').innerText.toLowerCase();
+            if(title.includes(input) || author.includes(input)) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+    // Управление модальным окном
+    function openModal(title, author, description) {
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-author').innerText = author;
+        document.getElementById('m-desc').innerText = description;
+        document.getElementById('book-modal').classList.add('active');
+    }
+
+    function closeModal(event) {
+        if (!event || event.target.classList.contains('modal-overlay')) {
+            document.getElementById('book-modal').classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>
+
+```
